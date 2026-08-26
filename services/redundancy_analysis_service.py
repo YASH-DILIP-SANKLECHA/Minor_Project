@@ -1,51 +1,54 @@
 """
-Minor Project One - Automatic Redundancy Analysis Service
+Minor Project One - Automatic Redundancy Analysis Service.
 
-This service analyzes ONLY the user's actual dataset file.
+The only real project dataset is:
 
-It does not contain:
-- sample text
-- hardcoded keywords
-- Delhi-specific logic
-- population-specific logic
-- Bengaluru-specific logic
+    datasets/raw/dataset.txt
 
-The dataset file is the only source of information.
+Implemented phases:
+
+    Phase 1 -> Parsing + segmentation
+    Phase 2 -> Semantic embeddings
+    Phase 3 -> Similarity/redundancy detection
+    Phase 4 -> Information extraction
+    Phase 5 -> Utility + rarity
+    Phase 6 -> Contradiction detection
+    Phase 7 -> KEEP / REMOVE / REVIEW
+
+Important:
+Phases 1-6 are preserved.
+Phase 7 only consumes their results and does not modify the dataset.
+Actual removal belongs to Phase 8.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
+from core.contradiction_engine.contradiction_engine import (
+    ContradictionEngine,
+)
+from core.contradiction_engine.contradiction_result import (
+    ContradictionResult,
+)
+from core.decision_engine.decision_engine import DecisionEngine
+from core.decision_engine.decision_result import DecisionResult
 from core.embedding_engine.embedding_engine import EmbeddingEngine
+from core.information_extractor.information_extractor import (
+    InformationExtractor,
+)
+from core.rarity_engine.rarity_engine import RarityEngine
 from core.redundancy_engine.redundancy_engine import RedundancyEngine
 from core.redundancy_engine.redundancy_result import (
     RedundancyAnalysisResult,
 )
+from core.utility_engine.utility_engine import UtilityEngine
 from services.pipeline_service import PipelineService
 
 
 class RedundancyAnalysisService:
     """
-    Runs the complete automatic redundancy analysis pipeline.
-
-    Flow:
-
-        User's dataset.txt
-             ↓
-        Document parsing
-             ↓
-        Sentence segmentation
-             ↓
-        Information units
-             ↓
-        Sentence embeddings
-             ↓
-        ALL pairwise comparisons
-             ↓
-        Cross-document similarity filtering
-             ↓
-        Final similar pairs
+    Coordinate the complete Phase 1-7 analysis pipeline.
     """
 
     def __init__(
@@ -53,24 +56,26 @@ class RedundancyAnalysisService:
         pipeline_service: PipelineService | None = None,
         embedding_engine: EmbeddingEngine | None = None,
         redundancy_engine: RedundancyEngine | None = None,
+        contradiction_engine: ContradictionEngine | None = None,
+        decision_engine: DecisionEngine | None = None,
     ) -> None:
         """
-        Initialize the automatic analysis service.
+        Initialize all project analysis components.
         """
 
-        # Use the existing Phase 1 pipeline.
+        # Reuse the existing Phase 1 parser and segmenter.
         self.pipeline_service = (
             pipeline_service
             or PipelineService()
         )
 
-        # Use the existing Phase 2 embedding engine.
+        # Reuse the existing Phase 2 embedding engine.
         self.embedding_engine = (
             embedding_engine
             or EmbeddingEngine()
         )
 
-        # Use the Phase 3 redundancy engine with the same embedding engine.
+        # Reuse the existing Phase 3 redundancy engine.
         self.redundancy_engine = (
             redundancy_engine
             or RedundancyEngine(
@@ -80,71 +85,318 @@ class RedundancyAnalysisService:
             )
         )
 
+        # Initialize the Phase 4 information extractor.
+        self.information_extractor = InformationExtractor()
+
+        # Initialize the Phase 5 utility engine.
+        self.utility_engine = UtilityEngine()
+
+        # Initialize the Phase 5 rarity engine.
+        self.rarity_engine = RarityEngine()
+
+        # Initialize the Phase 6 contradiction engine.
+        self.contradiction_engine = (
+            contradiction_engine
+            or ContradictionEngine()
+        )
+
+        # Initialize the Phase 7 decision engine.
+        self.decision_engine = (
+            decision_engine
+            or DecisionEngine()
+        )
+
+        # Store contradiction results from the latest analysis.
+        self.last_contradictions: list[
+            ContradictionResult
+        ] = []
+
+        # Store decision results from the latest analysis.
+        self.last_decisions: list[
+            DecisionResult
+        ] = []
+
     def analyze_file(
         self,
         file_path: str | Path,
     ) -> RedundancyAnalysisResult:
         """
-        Analyze the supplied dataset file automatically.
+        Run the complete Phase 1-7 pipeline on the supplied dataset file.
 
-        The caller supplies only the file path.
-        The contents are read and analyzed automatically.
+        The file path is the only dataset-specific input.
         """
 
-        # Parse the actual dataset file into documents and information units.
+        # Phase 1:
+        # Parse the actual dataset and create information units.
         pipeline_result = self.pipeline_service.process_file(
             file_path
         )
 
-        # Convert every information unit into a semantic embedding.
+        # Phase 2:
+        # Generate semantic embeddings.
         information_units = (
             self.embedding_engine.encode_information_units(
                 pipeline_result.information_units
             )
         )
 
-        # Run the redundancy engine.
-        # Every pair is compared internally, but final candidates
-        # are restricted to high-similarity pairs across different documents.
-        return self.redundancy_engine.analyze(
+        # Phase 4:
+        # Extract structured information from every unit.
+        extractions = self.information_extractor.extract_many(
+            information_units
+        )
+
+        # Phase 5:
+        # Calculate utility scores.
+        utility_scores = self.utility_engine.calculate_many(
+            extractions
+        )
+
+        # Phase 5:
+        # Calculate rarity scores.
+        rarity_scores = self.rarity_engine.calculate_many(
+            extractions
+        )
+
+        # Create an efficient lookup by information-unit ID.
+        extraction_by_id = {
+            extraction.information_unit_id: extraction
+            for extraction in extractions
+        }
+
+        # Attach Phase 4/5 metadata to the existing InformationUnit objects.
+        for information_unit in information_units:
+
+            # Identify the current information unit.
+            unit_id = information_unit.information_unit_id
+
+            # Retrieve its extraction result.
+            extraction = extraction_by_id[unit_id]
+
+            # Store structured extracted information.
+            information_unit.metadata[
+                "extraction"
+            ] = extraction.to_dict()
+
+            # Store utility protection.
+            information_unit.metadata[
+                "utility_score"
+            ] = utility_scores[unit_id]
+
+            # Store rarity protection.
+            information_unit.metadata[
+                "rarity_score"
+            ] = rarity_scores[unit_id]
+
+        # Phase 3:
+        # Preserve the existing cross-document similarity behavior.
+        result = self.redundancy_engine.analyze(
             information_units,
             cross_document_only=True,
         )
 
+        # Phase 6:
+        # Analyze only the similar pairs identified by Phase 3.
+        self.last_contradictions = (
+            self.contradiction_engine.analyze_pairs(
+                result.similar_pairs,
+                extraction_by_id,
+            )
+        )
+
+        # Build the utility/rarity metadata required by Phase 7.
+        metadata_by_id = {
+            information_unit.information_unit_id: {
+                "utility_score": information_unit.metadata.get(
+                    "utility_score",
+                    0.0,
+                ),
+                "rarity_score": information_unit.metadata.get(
+                    "rarity_score",
+                    0.0,
+                ),
+            }
+            for information_unit in information_units
+        }
+
+        # Phase 7:
+        # Make KEEP/REMOVE/REVIEW recommendations.
+        self.last_decisions = (
+            self.decision_engine.decide_all(
+                pairs=result.similar_pairs,
+                metadata_by_id=metadata_by_id,
+                contradictions=self.last_contradictions,
+            )
+        )
+
+        # Return the same RedundancyAnalysisResult used by previous phases.
+        return result
+
+    def analyze_text(
+        self,
+        text: str,
+    ) -> RedundancyAnalysisResult:
+        """
+        Run Phases 1-7 on in-memory text.
+
+        This method is retained for the existing automated tests
+        and future API usage.
+        """
+
+        # Phase 1:
+        # Parse and segment the supplied text.
+        pipeline_result = self.pipeline_service.process_text(
+            text
+        )
+
+        # Phase 2:
+        # Generate embeddings.
+        information_units = (
+            self.embedding_engine.encode_information_units(
+                pipeline_result.information_units
+            )
+        )
+
+        # Phase 4:
+        # Extract structured information.
+        extractions = self.information_extractor.extract_many(
+            information_units
+        )
+
+        # Phase 5:
+        # Calculate utility.
+        utility_scores = self.utility_engine.calculate_many(
+            extractions
+        )
+
+        # Phase 5:
+        # Calculate rarity.
+        rarity_scores = self.rarity_engine.calculate_many(
+            extractions
+        )
+
+        # Build the extraction lookup.
+        extraction_by_id = {
+            extraction.information_unit_id: extraction
+            for extraction in extractions
+        }
+
+        # Attach Phase 4/5 metadata to each information unit.
+        for information_unit in information_units:
+
+            # Retrieve the current unit ID.
+            unit_id = information_unit.information_unit_id
+
+            # Retrieve its extraction.
+            extraction = extraction_by_id[unit_id]
+
+            # Store extraction metadata.
+            information_unit.metadata[
+                "extraction"
+            ] = extraction.to_dict()
+
+            # Store utility.
+            information_unit.metadata[
+                "utility_score"
+            ] = utility_scores[unit_id]
+
+            # Store rarity.
+            information_unit.metadata[
+                "rarity_score"
+            ] = rarity_scores[unit_id]
+
+        # Preserve the test-oriented behavior of the service.
+        result = self.redundancy_engine.analyze(
+            information_units,
+            cross_document_only=False,
+        )
+
+        # Phase 6:
+        # Detect contradictions among similar pairs.
+        self.last_contradictions = (
+            self.contradiction_engine.analyze_pairs(
+                result.similar_pairs,
+                extraction_by_id,
+            )
+        )
+
+        # Prepare metadata for Phase 7.
+        metadata_by_id = {
+            information_unit.information_unit_id: {
+                "utility_score": information_unit.metadata.get(
+                    "utility_score",
+                    0.0,
+                ),
+                "rarity_score": information_unit.metadata.get(
+                    "rarity_score",
+                    0.0,
+                ),
+            }
+            for information_unit in information_units
+        }
+
+        # Phase 7:
+        # Make decisions for all similar pairs.
+        self.last_decisions = (
+            self.decision_engine.decide_all(
+                pairs=result.similar_pairs,
+                metadata_by_id=metadata_by_id,
+                contradictions=self.last_contradictions,
+            )
+        )
+
+        return result
+
+    def get_contradictions(
+        self,
+    ) -> list[ContradictionResult]:
+        """
+        Return contradiction results from the latest analysis.
+        """
+
+        # Return a copy to protect internal state.
+        return list(self.last_contradictions)
+
+    def get_decisions(
+        self,
+    ) -> list[DecisionResult]:
+        """
+        Return Phase 7 decisions from the latest analysis.
+        """
+
+        # Return a copy to protect internal state.
+        return list(self.last_decisions)
+
     @staticmethod
     def print_result(
         result: RedundancyAnalysisResult,
+        contradictions: list[ContradictionResult] | None = None,
+        decisions: list[DecisionResult] | None = None,
     ) -> None:
         """
-        Print ONLY the final automatically detected similar pairs.
-
-        The complete pairwise similarity matrix remains available
-        internally through result.all_similarities, but it is not dumped
-        to the terminal.
-
-        This keeps the terminal output focused on the project's actual
-        redundancy candidates.
+        Print the existing similarity/contradiction results and
+        the new Phase 7 decisions.
         """
 
-        # Show how many total pairwise comparisons were performed internally.
+        # Print the number of pairwise comparisons.
         print(
             f"Total comparisons performed: "
             f"{result.total_comparisons}"
         )
 
-        # Show how many final cross-document similar pairs were detected.
+        # Print the number of final similar pairs.
         print(
             f"Final similar pairs detected: "
             f"{result.similar_pair_count}"
         )
 
-        # Show the current experimental semantic threshold.
+        # Print the existing Phase 3 threshold.
         print(
             f"Similarity threshold: "
             f"{result.similarity_threshold:.2f}"
         )
 
-        # Show the number of similarity groups.
+        # Print the number of similarity groups.
         print(
             f"Similarity groups: "
             f"{result.group_count}"
@@ -157,73 +409,176 @@ class RedundancyAnalysisService:
             + "=" * 70
         )
 
-        # If no pair satisfies the current criteria, report that clearly.
+        # Preserve the existing final similar-pair output.
         if not result.similar_pairs:
-            print("No cross-document similar pairs detected.")
-            return
-
-        # Sort the final pairs from highest similarity to lowest.
-        sorted_pairs = sorted(
-            result.similar_pairs,
-            key=lambda pair: pair.similarity_score,
-            reverse=True,
-        )
-
-        # Print ONLY the final similar pairs.
-        for index, pair in enumerate(
-            sorted_pairs,
-            start=1,
-        ):
-
-            # Display the pair number.
-            print(f"\n[{index}]")
-
-            # Display the first sentence.
-            print(pair.text_a)
-
-            # Display the relationship marker.
-            print("<->")
-
-            # Display the second sentence.
-            print(pair.text_b)
-
-            # Display the semantic similarity score.
             print(
-                f"Similarity: "
-                f"{pair.similarity_score:.4f}"
+                "No cross-document similar pairs detected."
+            )
+        else:
+            # Sort candidates by strongest similarity first.
+            sorted_pairs = sorted(
+                result.similar_pairs,
+                key=lambda pair: pair.similarity_score,
+                reverse=True,
             )
 
-            # Display the current Phase 3 redundancy score.
+            # Print every final similar pair.
+            for index, pair in enumerate(
+                sorted_pairs,
+                start=1,
+            ):
+                print(f"\n[{index}]")
+                print(pair.text_a)
+                print("<->")
+                print(pair.text_b)
+                print(
+                    f"Similarity: "
+                    f"{pair.similarity_score:.4f}"
+                )
+                print(
+                    f"Redundancy Score: "
+                    f"{pair.redundancy_score:.4f}"
+                )
+
+        print(
+            "\n"
+            + "=" * 70
+            + "\nCONTRADICTION CANDIDATES\n"
+            + "=" * 70
+        )
+
+        # Print contradiction results produced by Phase 6.
+        if not contradictions:
             print(
-                f"Redundancy Score: "
-                f"{pair.redundancy_score:.4f}"
+                "No contradiction candidates detected."
+            )
+        else:
+            # Print each contradiction candidate.
+            for index, contradiction in enumerate(
+                contradictions,
+                start=1,
+            ):
+                print(f"\n[{index}]")
+                print(contradiction.text_a)
+                print("<->")
+                print(contradiction.text_b)
+                print(
+                    f"Similarity: "
+                    f"{contradiction.similarity_score:.4f}"
+                )
+                print(
+                    f"Contradiction Score: "
+                    f"{contradiction.contradiction_score:.4f}"
+                )
+                print(
+                    f"Value A: "
+                    f"{', '.join(contradiction.value_a)}"
+                )
+                print(
+                    f"Value B: "
+                    f"{', '.join(contradiction.value_b)}"
+                )
+                print(
+                    f"Reason: "
+                    f"{contradiction.reason}"
+                )
+
+        print(
+            "\n"
+            + "=" * 70
+            + "\nDECISIONS\n"
+            + "=" * 70
+        )
+
+        # Report when there are no decisions.
+        if not decisions:
+            print(
+                "No decision candidates detected."
+            )
+            return
+
+        # Count each decision category for the summary.
+        keep_count = sum(
+            decision.decision == "KEEP"
+            for decision in decisions
+        )
+
+        remove_count = sum(
+            decision.decision == "REMOVE"
+            for decision in decisions
+        )
+
+        review_count = sum(
+            decision.decision == "REVIEW"
+            for decision in decisions
+        )
+
+        # Print the summary counts.
+        print(
+            f"KEEP: {keep_count}"
+        )
+        print(
+            f"REMOVE: {remove_count}"
+        )
+        print(
+            f"REVIEW: {review_count}"
+        )
+
+        # Print each decision with its supporting reason.
+        for index, decision in enumerate(
+            decisions,
+            start=1,
+        ):
+            print(f"\n[{index}]")
+            print(decision.text_a)
+            print("<->")
+            print(decision.text_b)
+            print(
+                f"Decision: "
+                f"{decision.decision}"
+            )
+            print(
+                f"Confidence: "
+                f"{decision.confidence:.4f}"
+            )
+            print(
+                f"Reason: "
+                f"{decision.reason}"
             )
 
 
 def main() -> None:
     """
-    Analyze the project's actual dataset.txt.
-
-    No text is embedded in this file.
+    Run the complete Phase 1-7 analysis on the real dataset.
     """
 
-    # Point directly to the real project dataset.
+    # Use the project's only actual dataset file.
     dataset_path = Path(
         "datasets/raw/dataset.txt"
     )
 
-    # Create the automatic service.
+    # Create the complete analysis service.
     service = RedundancyAnalysisService()
 
-    # Analyze only the supplied dataset file.
+    # Run the actual project dataset through Phases 1-7.
     result = service.analyze_file(
         dataset_path
     )
 
-    # Print only the final similar-pair results.
-    service.print_result(result)
+    # Retrieve contradiction results.
+    contradictions = service.get_contradictions()
+
+    # Retrieve Phase 7 decisions.
+    decisions = service.get_decisions()
+
+    # Display all currently implemented results.
+    service.print_result(
+        result,
+        contradictions,
+        decisions,
+    )
 
 
 if __name__ == "__main__":
-    # Start the analysis when the module is executed directly.
+    # Start the analysis when this module is executed directly.
     main()

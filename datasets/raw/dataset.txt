@@ -1,13 +1,13 @@
 Article 1
 India has a population of 1.46 billion.
 Delhi is the capital of India.
-The population of India is approximately 1.46 billion people.
-India has a very large population.
-The capital city of India is Delhi.
+The temperature of the storage facility is 80°C.
+The city recorded a rainfall of 120 mm in July.
+The project was completed in 2025.
 
 Article 2
 Approximately 1.46 billion people live in India.
-Delhi serves as India's capital city.
-Bengaluru is a major technology hub.
-India has a large technology industry.
-India's population is about 1.46 billion.
+The capital city of India is Delhi.
+The temperature of the storage facility is 70°C.
+The city recorded a rainfall of 120 mm in July.
+The project was completed in 2025.
