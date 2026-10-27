@@ -1,0 +1,16 @@
+INTELLIGENT DATASET REFINEMENT PROJECT
+ITERATIVE AND INCREMENTAL DEVELOPMENT (IID) RECORD
+
+- This workspace is separate from D:\minor_project_one.
+- Overall methodology: Iterative and Incremental Development (IID).
+- Incremental means that each iteration adds one usable capability to the previous working version.
+- Iterative means that one increment is built, tested, corrected when a defect is found, and retested until that same increment is accepted.
+- Project-level planning defines the six increments and their architecture before implementation begins.
+- Every increment follows the same loop: requirement -> design -> implementation -> testing and integration -> fix/rebuild the same increment when needed -> retest -> acceptance.
+- After acceptance, the next increment adds a new capability to the accepted system.
+- Observations from an accepted increment can help plan later work, but this is not the definition of iteration.
+- The project does not use the strict waterfall model because testing can send the current increment back to implementation.
+- Iteration 1 begins with Python data processing; the full frontend is integrated last in Iteration 6.
+- Each later project folder contains the previous version plus its new tested capability.
+- Iteration 6 is the only complete version to run.
+- Do not run Iterations 1 to 5 sequentially; they are development-history snapshots.

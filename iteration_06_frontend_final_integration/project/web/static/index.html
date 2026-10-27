@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INFORA | Dataset Refinement Lab</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero panel">
+        <div>
+          <p class="eyebrow">INFORA / DUAL-MODEL EVALUATION</p>
+          <h1>Dataset <span>Refinement</span> Lab</h1>
+          <p class="subtitle">Ask the same question to a raw-data chatbot and its refined-data counterpart.</p>
+        </div>
+        <div class="hero-actions">
+          <a id="refined-dataset-link" class="dataset-link disabled" aria-disabled="true">View refined dataset <span>↗</span></a>
+          <div class="orb" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+      </header>
+
+      <section class="report panel" aria-label="Refinement report">
+        <div class="section-title"><span class="status-dot"></span><h2>Final refinement report</h2></div>
+        <div class="report-grid">
+          <div><span>Original lines</span><strong id="report-original-lines">—</strong></div>
+          <div><span>Refined lines</span><strong id="report-refined-lines">—</strong></div>
+          <div><span>Total reduction</span><strong id="report-reduction">—</strong></div>
+          <div><span>Similarities removed</span><strong id="report-similarities">—</strong></div>
+          <div><span>Contradictions resolved</span><strong id="report-contradictions">—</strong></div>
+          <div><span>Manual review required</span><strong id="report-manual">—</strong></div>
+        </div>
+      </section>
+
+      <section class="ingest-panel panel">
+        <div class="section-title"><span class="status-dot"></span><h2>Refine a new raw dataset</h2></div>
+        <p class="hint">Paste one statement per line. Starting refinement replaces the current local raw and refined datasets.</p>
+        <form id="refinement-form">
+          <label for="dataset-text">Raw dataset</label>
+          <textarea id="dataset-text" name="dataset-text" rows="9" placeholder="Paste the user dataset here. Example:&#10;India's capital is Delhi.&#10;Delhi is the capital of India." required></textarea>
+          <div class="ingest-actions"><span id="refinement-status" class="job-status">Ready for a raw dataset.</span><button id="refine-button" type="submit">Refine dataset <span>↻</span></button></div>
+        </form>
+      </section>
+
+      <section class="question-panel panel">
+        <div class="section-title"><span class="status-dot"></span><h2>Ask a question</h2></div>
+        <form id="question-form">
+          <label for="question">Question for both chatbots</label>
+          <div class="input-row">
+            <input id="question" name="question" placeholder="For example: Where is the Eiffel Tower located?" required minlength="3" />
+            <button id="ask-button" type="submit">Run comparison <span>→</span></button>
+          </div>
+        </form>
+        <p class="hint">Each response is grounded only in its own selected dataset context and is instructed to summarize rather than quote it.</p>
+      </section>
+
+      <section class="answers" aria-live="polite">
+        <article class="answer-card panel raw-card">
+          <div class="card-heading"><span class="badge">RAW</span><div><h2>Raw-data chatbot</h2><p id="raw-context">Waiting for a question</p></div></div>
+          <div id="raw-answer" class="answer-body placeholder">The original dataset response will appear here.</div>
+        </article>
+        <article class="answer-card panel refined-card">
+          <div class="card-heading"><span class="badge refined">REFINED</span><div><h2>Refined-data chatbot</h2><p id="refined-context">Waiting for a question</p></div></div>
+          <div id="refined-answer" class="answer-body placeholder">The optimized dataset response will appear here.</div>
+        </article>
+      </section>
+      <p id="error" class="error" role="alert"></p>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

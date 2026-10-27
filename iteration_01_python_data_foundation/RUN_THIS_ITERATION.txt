@@ -1,0 +1,17 @@
+ITERATION 1 - RUN AND TEST
+
+This increment accepts a TXT dataset and identifies the statements in it.
+
+1. Open a PowerShell terminal in this folder:
+   D:\minor_project_iterative_approach\iteration_01_python_data_foundation\project
+
+2. Create and activate a virtual environment once:
+   py -3.13 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+
+3. Run this increment:
+   python run_iteration.py --input "C:\path\to\dataset.txt"
+
+Expected result: document and statement counts are printed. No duplicate or
+contradiction decisions are part of Iteration 1.

@@ -1,0 +1,37 @@
+PROJECT PROCESS MODEL: ITERATIVE AND INCREMENTAL DEVELOPMENT (IID)
+
+Project-level planning and architecture
+                |
+                v
+For every increment:
+
+Requirement -> Design -> Implement -> Test and integrate
+                                  ^              |
+                                  |              |
+                                  +--- issue ----+
+                                                 |
+                              accepted ----------+
+                                  |
+                                  v
+                    Add the next capability to the accepted system
+
+Iteration 1 accepted -> Iteration 2 accepted -> Iteration 3 accepted
+        -> Iteration 4 accepted -> Iteration 5 accepted -> Iteration 6 final system
+
+INCREMENTS IN THIS PROJECT
+
+1. Python data foundation
+2. Semantic duplicate refinement
+3. Contradiction detection
+4. Local Ollama public-fact verification
+5. FastAPI and manual-review workflow
+6. React/Vite interface and full end-to-end integration
+
+ALIGNMENT CHECK
+
+- Each iteration preserves the tested capability from earlier iterations.
+- Each iteration adds a distinct, usable capability rather than replacing the system.
+- Within an iteration, a failed test returns to the same iteration's implementation/design work until it passes.
+- An accepted iteration becomes the tested baseline for the next increment.
+- Review observations may help plan later work, but they do not replace the build-test-fix-retest iteration loop.
+- Therefore, this project aligns with the Iterative and Incremental Development model.

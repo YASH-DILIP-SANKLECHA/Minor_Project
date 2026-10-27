@@ -1,0 +1,21 @@
+ITERATION 4 - RUN AND TEST
+
+This increment includes conflict detection and adds local Ollama/Qwen verification
+for public factual conflicts.
+
+1. Start the local model service in a separate terminal:
+   ollama serve
+
+2. Open a PowerShell terminal in this folder:
+   D:\minor_project_iterative_approach\iteration_04_local_ollama_verification\project
+
+3. Create and activate a virtual environment once:
+   py -3.13 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+
+4. Run this increment:
+   python run_iteration.py --input "C:\path\to\dataset.txt"
+
+Expected result: public conflict decisions are applied locally and the output is
+saved in output\optimized_dataset.txt. No web interface is part of this increment.

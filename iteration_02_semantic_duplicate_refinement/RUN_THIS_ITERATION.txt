@@ -1,0 +1,17 @@
+ITERATION 2 - RUN AND TEST
+
+This increment includes Iteration 1 and adds local semantic duplicate removal.
+
+1. Open a PowerShell terminal in this folder:
+   D:\minor_project_iterative_approach\iteration_02_semantic_duplicate_refinement\project
+
+2. Create and activate a virtual environment once:
+   py -3.13 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+
+3. Run this increment:
+   python run_iteration.py --input "C:\path\to\dataset.txt"
+
+Expected result: safe duplicate reduction is written to output\optimized_dataset.txt.
+Possible factual conflicts are not resolved in this increment; that is added next.

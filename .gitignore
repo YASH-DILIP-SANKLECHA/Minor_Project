@@ -1,7 +1,9 @@
 .venv/
+node_modules/
 __pycache__/
 *.pyc
+dist/
+output/
+datasets/optimized/
+datasets/raw/dataset.txt
 .env
-.vscode/
-.idea/
-.pytest_cache/

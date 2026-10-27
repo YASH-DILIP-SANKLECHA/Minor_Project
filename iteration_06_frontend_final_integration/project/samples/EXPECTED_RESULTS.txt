@@ -1,0 +1,30 @@
+01_india_120_lines.txt
+- Original lines: 120
+- Expected automatic public conflicts: 10
+- Expected manual-review pairs: 5
+- Expected exact duplicate removals: 20
+
+02_world_geography_1000_lines.txt
+- Original lines: 1000
+- Expected automatic public conflicts: 30
+- Expected manual-review pairs: 6
+- Expected exact duplicate removals: 200
+
+03_civics_history_5000_lines.txt
+- Original lines: 5000
+- Expected automatic public conflicts: 100
+- Expected manual-review pairs: 10
+- Expected exact duplicate removals: 1900
+- Expected refined lines before manual choices: approximately 3000
+
+04_science_society_10000_lines.txt
+- Original lines: 10000
+- Expected automatic public conflicts: 200
+- Expected manual-review pairs: 15
+- Expected exact duplicate removals: 2800
+- Expected refined lines before manual choices: approximately 7000
+
+Notes
+- Counts describe intended known pairs in the input.
+- Manual-review pairs remain retained until the user selects a statement.
+- The application has no code tied to these files.

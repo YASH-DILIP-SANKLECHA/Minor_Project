@@ -1,0 +1,21 @@
+ITERATION 5 - RUN AND TEST
+
+This increment includes the full Python pipeline and adds the FastAPI backend,
+status/report endpoints, downloads, and manual-review state. It has no React UI.
+
+1. Start Ollama in a separate terminal:
+   ollama serve
+
+2. Open a PowerShell terminal in this folder:
+   D:\minor_project_iterative_approach\iteration_05_fastapi_manual_review\project
+
+3. Create the environment and install the requirements once:
+   py -3.13 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements-web.txt
+
+4. On later runs, activate the environment and start the backend:
+   .\.venv\Scripts\Activate.ps1
+   python run_backend.py
+
+5. Open http://127.0.0.1:8000/docs to test the API endpoints.

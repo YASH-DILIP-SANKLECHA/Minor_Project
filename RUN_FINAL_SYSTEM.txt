@@ -1,0 +1,24 @@
+RUN THE FINAL PROJECT ONLY
+
+1. Open a terminal in:
+   D:\minor_project_iterative_approach\iteration_06_frontend_final_integration\project
+
+2. Start Ollama in the usual way and confirm this works in a separate terminal:
+   ollama run qwen3:4b
+
+3. Start the backend:
+   python run_backend.py
+
+4. Open a second terminal in:
+   D:\minor_project_iterative_approach\iteration_06_frontend_final_integration\project\frontend
+
+5. Install frontend packages once:
+   npm install
+
+6. Start the frontend:
+   npm run dev
+
+7. Open:
+   http://localhost:5173
+
+Do not run Iterations 1 to 5 as a sequence. They are cumulative development snapshots used to explain the iterative and incremental development approach.

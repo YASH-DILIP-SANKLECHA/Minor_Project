@@ -1,0 +1,18 @@
+ITERATION 3 - RUN AND TEST
+
+This increment includes duplicate refinement and adds deterministic conflict
+candidate detection. It does not use Ollama.
+
+1. Open a PowerShell terminal in this folder:
+   D:\minor_project_iterative_approach\iteration_03_contradiction_detection\project
+
+2. Create and activate a virtual environment once:
+   py -3.13 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+
+3. Run this increment:
+   python run_iteration.py --input "C:\path\to\dataset.txt"
+
+Expected result: safe duplicates are removed, while possible contradictions are
+counted and preserved in output\refined_before_verification.txt.
